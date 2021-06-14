@@ -1,0 +1,162 @@
+\documentclass[a4paper,11pt,final]{article}
+\usepackage{fancyvrb, color, graphicx, hyperref, amsmath, url}
+\usepackage{palatino}
+\usepackage{pygments}
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+        
+\hypersetup  
+{   pdfauthor = {Maria Eduarda Bicalho},
+  pdftitle={FIR filter design with Python and SciPy},
+  colorlinks=TRUE,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.2ex}
+
+
+        
+\title{Relatorio Intermediário}
+\author{Maria Eduarda Bicalho}
+\date{30 de abril de 2020}
+
+\begin{document}
+\maketitle
+
+
+\section{Descrição do Problema}
+
+Text is written
+
+
+\subsection{Máquina utilizada}
+
+Falar sobre máquina
+
+
+
+\section{Efeito número de pessoas}
+
+Análise do impacto  de uma entrada com diferentes números de pessoas
+nos 3 diferentes algorítimos implementados no projeto.
+
+<<>>=
+import subprocess
+import time
+import matplotlib.pyplot as plt
+    
+#Plotagem
+def roda(ex, in_f):
+    with open(in_f) as f:
+        start = time.perf_counter()
+        proc = subprocess.run([ex], input=f.read(), text=True, capture_output=True)
+        end = time.perf_counter()
+    return proc.stdout, end-start
+arqs = [f"inp/in{i}.txt" for i in range(50)]
+
+
+@
+
+\subsection{Tempo}
+
+Nessa seção o tempo será analisado nos diferentes algorítimos
+
+
+\subsubsection{Heurística}
+
+Primeiramente, análise da Heurística
+
+<<>>=
+heuristica = [roda('./heuristica', arq)[1] for arq in arqs]
+plt.plot(heuristica)
+@
+
+
+\subsubsection{Busca Local}
+
+<<>>=
+local= [roda('./local', arq)[1] for arq in arqs]
+plt.plot(local)
+@
+
+\subsubsection{Busca Global}
+
+Let's define a highpass FIR filter:
+
+<<>>=
+local= [roda('./local', arq)[1] for arq in arqs]
+plt.plot(local)
+@
+
+\subsection{Qualidade da solução}
+
+Nessa seção a qualidade da solução será analisada nos diferentes algorítimos. 
+Para isso, 
+
+
+\subsubsection{Heurística}
+
+\subsubsection{Busca Local}
+
+\subsubsection{Busca Global}
+
+\section{Efeito número de objetos}
+
+<<>>=
+import subprocess
+import time
+import matplotlib.pyplot as plt
+    
+#Plotagem
+def roda(ex, in_f):
+    with open(in_f) as f:
+        start = time.perf_counter()
+        proc = subprocess.run([ex], input=f.read(), text=True, capture_output=True)
+        end = time.perf_counter()
+    return proc.stdout, end-start
+arqs = [f"ino/in{i}.txt" for i in range(50)]
+@
+
+
+\subsection{Tempo}
+
+\subsubsection{Heurística}
+
+Primeiramente, análise da Heurística
+
+<<>>=
+heuristica = [roda('./heuristica', arq)[1] for arq in arqs]
+plt.plot(heuristica)
+@
+
+
+\subsubsection{Busca Local}
+
+<<>>=
+local= [roda('./local', arq)[1] for arq in arqs]
+plt.plot(local)
+@
+
+\subsubsection{Busca Global}
+
+Let's define a highpass FIR filter:
+
+<<>>=
+local= [roda('./local', arq)[1] for arq in arqs]
+plt.plot(local)
+@
+
+\subsection{Qualidade da solução}
+
+\subsubsection{Heurística}
+
+\subsubsection{Busca Local}
+
+\subsubsection{Busca Global}
+
+\section{Conclusão}
+
+
+\end{document}

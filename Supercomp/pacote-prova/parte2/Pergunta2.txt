@@ -1,0 +1,9 @@
+// Pergunta 2 
+
+1  - 5,3 = 14
+2 - 2,1 = 8
+3 - 4 = 4
+
+/// Para essa a tribuição, Alice ficaria com [5,3], George com [2,1] e Dina com [4]. Sim essa divisão 
+//é justa, pois Alice fciou com 14 que é maior que 7, George ficou com 8, que é a sua mms, 
+// e Dina ficou com 4, que é maior que 3. A partição menos valiosa é a de dina, que ficou com valor total 4.

@@ -1,0 +1,8 @@
+Pergunta 3 
+
+
+Para descartar soluções que não sejam justas devemos não so comparar o MMS e guardar os ids de cada objeto
+Par cada pessoa, mas devemos tambem analisar o valor total de cada pessoa. Para saber se a solução final é 
+justa precisamos descobrir e guarda o MMS  de cada pessoa a partir dos valores atribuidos aos objetos por 
+cada uma. Em cada solução deve ser analisado se o valor final de cada pessoa é maior ou igual ao seu 
+MMS  individual, se o de uma ou mais pessoas não for  a solução é descartada.

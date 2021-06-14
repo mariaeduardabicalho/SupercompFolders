@@ -1,0 +1,314 @@
+\documentclass[a4paper,11pt,final]{article}
+\usepackage{fancyvrb, color, graphicx, hyperref, amsmath, url}
+\usepackage{palatino}
+\usepackage{pygments}
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+        
+\hypersetup  
+{   pdfauthor = {Maria Eduarda Bicalho},
+  pdftitle={FIR filter design with Python and SciPy},
+  colorlinks=TRUE,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.2ex}
+
+
+        
+\title{Relatório Intermediário}
+\author{Maria Eduarda Bicalho}
+\date{30 de abril de 2020}
+
+\begin{document}
+\maketitle
+
+
+\section{Descrição do Problema}
+
+    O projeto Maximin Share tem como objetivo fazer a divisão mais justa possível de um número de objetos com 
+diferentes valores entre um número diferente de pessoas. O problema pincipal se centra em como realizar 
+essa divisão. Dessa forma, três diferentes técnicas -  Herística, Busca Local e Busca Global - foram utilizadas 
+para produzir três diferentes algoritmos para executar essa partição.
+    Neste relatório essas três implementções serão analisadas com diferentes entradas para avaliar as
+alterções em suas saídas. Essas entradas possuírão diferentes tamanhos, alterando significamente. 
+Primeiramente, em relação a quantidade de pessoas e depois a quantidade de objetos. Dentro de cada uma dessas 
+análises, serão estudados o tempo, e a qualidade da solução em relação aos diferentes dimensões de entradas.
+A qualidade será analisada apartir do MMS (o valor da pessoa com o menor valor), ou seja quanto maior o MMS 
+maior a qualidade da saída.
+
+
+\subsection{Máquina utilizada}
+
+
+\section{Efeito número de pessoas}
+
+
+    Análise do impacto  de uma entrada com diferentes números de pessoas
+nos 3 diferentes algoritmos implementados no projeto. Se foi testando a capacidade da máquina,
+aumentando cada vez o input de pessoas. A busca global não conseguiu um tempo factível depois 
+de um número de entrada de 10 pessoas, dessa forma, esse algoritmo aparecerá somente na até o valor 
+de entrada 10, depois pode-se considerar um valor de tempo significamente maior do que a dos outros dois.
+
+<<echo = False>>=
+import subprocess
+import time
+import matplotlib.pyplot as plt
+    
+def roda(ex, in_f):
+    with open(in_f) as f:
+        start = time.perf_counter()
+        proc = subprocess.run([ex], input=f.read(), text=True, capture_output=True)
+        end = time.perf_counter()
+    return proc.stdout, end-start
+sz=100
+arqs = [f"inp/in{i}.txt" for i in range(sz)]
+arqsg = [f"inp/in{i}.txt" for i in range(10)]
+heuristica=[]
+local=[]
+exaus=[]
+outsh=[]
+outsl=[]
+outsg=[]
+@
+
+\subsection{Tempo}
+
+Nesta seção, a medida utilizada para a análise será a do tempo.
+
+<<echo = False>>=
+for arq in arqs:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+
+for i in range(sz-10):
+    exaus.append(exaus[-1])
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 10 PESSOAS 
+
+import matplotlib.pyplot as plt
+x= range(1,10,2)
+h,= plt.plot(x,heuristica[:5],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:5],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:5], 'g',label = 'Busca Global')
+
+
+plt.title("Entrada máxima de 10 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 20 PESSOAS 
+
+x= range(1,20,2)
+h,= plt.plot(x,heuristica[:10],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:10],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:10], 'g',label = 'Busca Global')
+
+plt.title("Entrada máxima de 20 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 40 PESSOAS 
+
+x= range(1,40,2)
+h,= plt.plot(x,heuristica[:20],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:20],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:20], 'g',label = 'Busca Global')
+
+plt.title("Entrada máxima de 40 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+import matplotlib.pyplot as plt
+x= range(1,sz*2,2)
+h,= plt.plot(x,heuristica,'b' ,label = "Heurística")
+l,= plt.plot(x,local,'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus, 'g',label = 'Busca Global')
+
+
+plt.title("Entrada máxima de 100 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+A partir dos gráficos pode-se concluir que os algoritmos de busca local de busca global possuem uma
+variação significamente maior do que a heurística, que se mantem quase constante.
+
+\subsection{Qualidade da solução}
+
+\subsubsection{Gráficos}
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-10):
+    outsg.append(outsg[-1])
+
+h,= plt.plot(x,outsh,'b' ,label = "Heurística")
+l,= plt.plot(x,outsl, 'm',label = 'Busca Local')
+g, = plt.plot(x,outsg,'g' ,label = 'Busca Global')
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+A análise da qualidade da solução com um aumento significativo no número de pessoas com uma mudança pequena
+na quantidade de objetos não é muito eficiciente, pois em determinado valor, não terá objetos suficientes 
+para a quantidade de pessoas. Dessa forma somente entradas bem pequenas são avaliadas, e uma diferença nos resutados
+das três diferentes implementações não é aparente. Se pode contruir a hipótese que com uma entrada maior, 
+uma diferença apareça. A análise apartir  número significamente maior de objetos será feita para concluir essa 
+tese.
+
+\section{Efeito número de objetos}
+
+<<echo = False>>=
+sz=100
+arqs = [f"ino/in{i}.txt" for i in range(sz)]
+arqsg = [f"ino/in{i}.txt" for i in range(5)]
+heuristica=[]
+local=[]
+exaus=[]
+outsh=[]
+outsl=[]
+outsg=[]
+@
+
+\subsection{Tempo}
+
+Nesta seção, a medida utilizada para a análise será a do tempo.
+
+<<echo = False>>=
+for arq in arqs:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+@
+
+<<echo = False>>=
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+for i in range(sz-5):
+    exaus.append(exaus[-1])
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 10 PESSOAS 
+
+import matplotlib.pyplot as plt
+x= range(1,10,2)
+h,= plt.plot(x,heuristica[:5],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:5],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:5], 'g',label = 'Busca Global')
+plt.title("Entrada máxima de 10 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 20 PESSOAS 
+
+x= range(1,20,2)
+h,= plt.plot(x,heuristica[:10],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:10],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:10], 'g',label = 'Busca Global')
+
+plt.title("Entrada máxima de 20 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 40 PESSOAS 
+
+x= range(1,40,2)
+h,= plt.plot(x,heuristica[:20],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:20],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:20], 'g',label = 'Busca Global')
+
+plt.title("Entrada máxima de 40 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+
+import matplotlib.pyplot as plt
+x= range(1,sz*2,2)
+h,= plt.plot(x,heuristica,'b' ,label = "Heurística")
+l,= plt.plot(x,local,'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus, 'g',label = 'Busca Global')
+
+
+plt.title("Entrada máxima de 100 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+\subsection{Qualidade da solução}
+
+\subsubsection{Gráficos}
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+
+h,= plt.plot(x,outsh,'b' ,label = "Heurística")
+l,= plt.plot(x,outsl, 'm',label = 'Busca Local')
+g, = plt.plot(x,outsg,'g' ,label = 'Busca Global')
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+
+@
+
+\section{Conclusão}
+
+
+\end{document}

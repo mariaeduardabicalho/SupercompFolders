@@ -1,0 +1,3 @@
+pweave -f tex  relatorio-intermediario.texw
+
+pdflatex relatorio-intermediario.tex

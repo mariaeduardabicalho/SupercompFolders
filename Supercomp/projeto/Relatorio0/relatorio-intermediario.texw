@@ -1,0 +1,301 @@
+\documentclass[a4paper,11pt,final]{article}
+\usepackage{fancyvrb, color, graphicx, hyperref, amsmath, url}
+\usepackage{palatino}
+\usepackage{pygments}
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+        
+\hypersetup  
+{   pdfauthor = {Maria Eduarda Bicalho},
+  pdftitle={FIR filter design with Python and SciPy},
+  colorlinks=TRUE,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.2ex}
+
+
+        
+\title{Relatório Intermediário}
+\author{Maria Eduarda Bicalho}
+\date{30 de abril de 2020}
+
+\begin{document}
+\maketitle
+
+
+\section{Descrição do Problema}
+
+O projeto Maximin Share tem como objetivo fazer a divisão mais justa possível de um número de objetos com 
+diferentes valores entre um número diferente de pessoas. O problema pincipal se centra em como realizar 
+essa divisão. Dessa forma, três diferentes técnicas -  Herística, Busca Local e Busca Global - foram utilizadas 
+para produzir três diferentes algoritmos para executar essa partição.
+    Neste relatório essas três implementções serão analisadas com diferentes entradas para avaliar as
+alterções em suas saídas. Essas entradas possuírão diferentes tamanhos, alterando significamente. 
+Primeiramente, em relação a quantidade de pessoas e depois a quantidade de objetos. Dentro de cada uma dessas 
+análises, serão estudados o tempo, e a qualidade da solução em relação aos diferentes dimensões de entradas.
+A qualidade será analisada apartir do MMS (o valor da pessoa com o menor valor), ou seja quanto maior o MMS 
+maior a qualidade da saída.
+
+
+\subsection{Máquina utilizada}
+
+Falar sobre máquina
+
+
+
+\section{Efeito número de pessoas}
+
+
+
+Análise do impacto  de uma entrada com diferentes números de pessoas
+nos 3 diferentes algoritmos implementados no projeto.
+
+<<>>=
+import subprocess
+import time
+import matplotlib.pyplot as plt
+    
+def roda(ex, in_f):
+    with open(in_f) as f:
+        start = time.perf_counter()
+        proc = subprocess.run([ex], input=f.read(), text=True, capture_output=True)
+        end = time.perf_counter()
+    return proc.stdout, end-start
+
+arqs= [f"inp/in{i}.txt" for i in range(200)]
+arqsg = [f"inp/in{i}.txt" for i in range(10)]
+heuristica=[]
+local=[]
+exaus=[]
+outsh=[]
+outsl=[]
+outsg=[]
+@
+
+\subsection{Tempo}
+
+Nessa seção o tempo será analisado nos diferentes algoritmos
+
+\subsubsection{Entrada máxima de 10 pessoas}
+
+<<>>=
+import matplotlib.pyplot as plt
+
+for arq in arqs10:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs10:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+
+h,= plt.plot(heuristica,'bo' ,label = "Heurística")
+l,= plt.plot(local,'mo' ,label = 'Busca Local')
+g, = plt.plot(exaus, 'go',label = 'Busca Global')
+
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',ncol=2, mode="expand", borderaxespad=0.)
+
+@
+\subsubsection{Entrada máxima de 50}
+
+<<>>=
+import matplotlib.pyplot as plt
+
+for arq in arqs50:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs50:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+
+h,= plt.plot(heuristica,'bo' ,label = "Heurística")
+l,= plt.plot(local,'mo' ,label = 'Busca Local')
+g, = plt.plot(exaus, 'go',label = 'Busca Global')
+
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',ncol=2, mode="expand", borderaxespad=0.)
+
+@
+\subsubsection{Entrada máxima de 100}
+
+<<>>=
+import matplotlib.pyplot as plt
+
+for arq in arqs100:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs100:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+
+h,= plt.plot(heuristica,'bo' ,label = "Heurística")
+l,= plt.plot(local,'mo' ,label = 'Busca Local')
+g, = plt.plot(exaus, 'go',label = 'Busca Global')
+
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',ncol=2, mode="expand", borderaxespad=0.)
+
+@
+
+\subsubsection{Entrada máxima de 200}
+
+<<>>=
+import matplotlib.pyplot as plt
+
+for arq in arqs200:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs200:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+
+h,= plt.plot(heuristica,'bo' ,label = "Heurística")
+l,= plt.plot(local,'mo' ,label = 'Busca Local')
+g, = plt.plot(exaus, 'go',label = 'Busca Global')
+
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',ncol=2, mode="expand", borderaxespad=0.)
+
+@
+
+\subsection{Qualidade da solução}
+
+\subsubsection{Gráficos}
+<<>>=
+import matplotlib.pyplot as plt
+
+plt.plot(outsh)
+plt.plot(outsl)
+plt.plot(outsg)
+
+h,= plt.plot(outsh,'bo' ,label = "Heurística")
+l,= plt.plot(outsl, 'mo',label = 'Busca Local')
+g, = plt.plot(outsg,'go' ,label = 'Busca Global')
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+ncol=2, mode="expand", borderaxespad=0.)
+@
+
+\section{Efeito número de objetos}
+
+<<>>=
+arqsg = [f"ino/in{i}.txt" for i in range(12)]
+arqs = [f"ino/in{i}.txt" for i in range(12)]
+
+heuristica=[]
+local=[]
+exaus=[]
+outsh=[]
+outsl=[]
+outsg=[]
+
+@
+
+\subsection{Tempo}
+
+\subsubsection{Gráficos}
+
+<<>>=
+import matplotlib.pyplot as plt
+
+for arq in arqs:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+
+h,= plt.plot(outsh,'bo' ,label = "Heurística")
+l,= plt.plot(outsl, 'mo',label = 'Busca Local')
+g, = plt.plot(outsg,'go' ,label = 'Busca Global')
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo (s))")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+ncol=2, mode="expand", borderaxespad=0.)
+
+print(exaus)
+print(local)
+print(exaus)
+@
+
+\subsection{Qualidade da solução}
+
+\subsubsection{Gráficos}
+<<>>=
+import matplotlib.pyplot as plt
+
+print(outsg[5])
+print(outsl[5])
+print(outsh[5])
+
+plt.plot(outsh)
+plt.plot(outsl)
+plt.plot(outsg)
+
+h,= plt.plot(outsh,'bo' ,label = "Heurística")
+l,= plt.plot(outsl, 'mo',label = 'Busca Local')
+g, = plt.plot(outsg,'go' ,label = 'Busca Global')
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+plt.legend(handles=[h, l, g],bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+ncol=2, mode="expand", borderaxespad=0.)
+
+@
+
+\section{Conclusão}
+
+
+\end{document}
