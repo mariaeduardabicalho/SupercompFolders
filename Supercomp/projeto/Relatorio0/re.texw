@@ -1,0 +1,480 @@
+\documentclass[a4paper,11pt,final]{article}
+\usepackage{fancyvrb, color, graphicx, hyperref, amsmath, url}
+\usepackage{palatino}
+\usepackage{pygments}
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+        
+\hypersetup  
+{   pdfauthor = {Maria Eduarda Bicalho},
+  pdftitle={FIR filter design with Python and SciPy},
+  colorlinks=TRUE,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.2ex}
+
+        
+\title{Relatório Intermediário}
+\author{Maria Eduarda Bicalho}
+\date{19 de Junho de 2020}
+
+\begin{document}
+\maketitle
+
+\section{Descrição do Problema}
+
+    O projeto Maximin Share tem como objetivo fazer a divisão mais justa possível de um número de objetos com 
+diferentes valores entre um número diferente de pessoas. O problema pincipal se centra em como realizar 
+essa divisão. Dessa forma, três diferentes técnicas -  Herística, Busca Local e Busca Global - foram utilizadas 
+para produzir três diferentes algoritmos para executar essa partição. A busca local possui 3 métodos de implementação, 
+um sequencial(forma mais comum, está presente também na heuristica e na busca global), um paralelizado com openmp e o outro
+utilizando gpu para paralelizar o gpu ao invez de cpu. 
+
+    Os algoritimos recebem como entrada o número de pessoas, o número de objetos e os valores dos objetos. Eles retornam
+    o MMS e e os ids dos objjetos de cada pessoa. A técnica da Heuristica utiliza
+
+    Neste relatório essas cinco implementções serão analisadas com diferentes entradas para avaliar as
+alterções em suas saídas. Essas entradas possuírão diferentes tamanhos, alterando significamente. 
+Primeiramente, em relação a quantidade de pessoas e depois a quantidade de objetos. Dentro de cada uma dessas 
+análises, serão estudados o tempo, e a qualidade da solução em relação aos diferentes dimensões de entradas.
+A qualidade será analisada apartir do MMS (o valor da pessoa com o menor valor), ou seja quanto maior o MMS 
+maior a qualidade da saída.
+
+
+\subsection{Máquina utilizada}
+
+Memória :  1.5 GiB  -
+  Disco : 63 GB  -
+  Processador : Intel i5 -
+  Virtualização: KVM  -
+
+
+\section{Efeito número de pessoas}
+
+   Nessa seção será realizada a análise do impacto de uma entrada com diferentes números de pessoas
+nos 3 diferentes algoritmos implementados no projeto.A capacidade da máquina foi sendo testada,
+aumentando cada vez mais o input de com o número pessoas. A variação do número de objetos foi baixa,
+para que a mudança dessa variável não fosse importante para o tempo e qualidade da solução, e esses 
+se mantivessem em função do delta pessoas. A busca global não conseguiu um tempo factível depois 
+de um número de entrada de 10 pessoas, dessa forma, esse algoritmo aparecerá somente até o valor 
+de entrada 10 - para as demais entradas foi assumido um valor limite. 
+
+<<echo = False>>=
+import subprocess
+import time
+import matplotlib.pyplot as plt
+    
+def roda(ex, in_f):
+    with open(in_f) as f:
+        start = time.perf_counter()
+        proc = subprocess.run([ex], input=f.read(), text=True, capture_output=True)
+        end = time.perf_counter()
+    return proc.stdout, end-start
+sz=100
+arqs = [f"inp/in{i}.txt" for i in range(sz)]
+arqsg = [f"inp/in{i}.txt" for i in range(5)]
+heuristica=[]
+local=[]
+exaus=[]
+gpu=[]
+paralela=[]
+outsh=[]
+outsl=[]
+outsg=[]
+outsgp=[]
+outsp=[]
+@
+
+\subsection{Tempo}
+
+Nesta seção, a medida utilizada para a análise será a do tempo.
+
+<<echo = False>>=
+for arq in arqs:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+for arq in arqs:
+    paralela.append(roda('./paralelo', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsp.append(int(line[0]))
+for arq in arqs:
+    gpu.append(roda('./gpu', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsgp.append(int(line[0]))
+
+for i in range(sz-5):
+    exaus.append(2)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 20 PESSOAS 
+
+x= range(1,20,2)
+h,= plt.plot(x,heuristica[:10],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:10],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:10], 'g',label = 'Busca Global')
+p, = plt.plot(x,paralela[:10],label = 'Busca Local Multi-core')
+gp, = plt.plot(x,gpu[:10],label = 'Busca Local GPU')
+
+plt.title("Entrada máxima de 20 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo")
+plt.legend(handles=[h, l, g,p,gp],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 40 PESSOAS 
+
+x= range(1,40,2)
+h,= plt.plot(x,heuristica[:20],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:20],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:20], 'g',label = 'Busca Global')
+p, = plt.plot(x,paralela[:20],label = 'Busca Local Multi-core')
+gp, = plt.plot(x,gpu[:20],label = 'Busca Local GPU')
+
+plt.title("Entrada máxima de 40 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo")
+plt.legend(handles=[h, l, g,p,gp],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+import matplotlib.pyplot as plt
+x= range(1,sz*2,2)
+h,= plt.plot(x,heuristica,'b' ,label = "Heurística")
+l,= plt.plot(x,local,'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus, 'g',label = 'Busca Global')
+p, = plt.plot(x,paralela,label = 'Busca Local Multi-core')
+gp, = plt.plot(x,gpu,label = 'Busca Local GPU')
+
+
+plt.title("Entrada máxima de 200 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo ")
+plt.legend(handles=[h, l, g,p,gp],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+
+
+A partir dos gráficos pode-se concluir que os algoritmos de busca local de busca global possuem 
+valores de tempo maiores do que a heurística, a qual não sofre fortes alterações. Um fato curioso que pode ser
+observado é que a busca local inicia com um tempo maior e logo antes da entrada de 10  - por volta da entrada de 7- 
+é ultrapassada rapidamente pela busca global, cuja variação é extremamente alta. Por realizar a busca no resultado 
+apresentado e não em todos os possíveis, a busca local já possui um tempo maior, mas factível na máquina utilizada 
+e possi um resultado melhor que o da heurística.Por ser um algoritmo que utiliza.recursão e percorre todos 
+os caminhos possíveis para certificar que possui o melhor, a implementação da busca global
+cresce rapidamente. O único esforço da solução heuristíca é o de ordenar, por isso o tempo não sofre grandes alterações.
+
+\subsection{Qualidade da solução}
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[10],outsl[10],outsg[10],outsp[10],outsgp[10]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 20 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[25],outsl[25],outsg[25],outsp[25],outsgp[25]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 50 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[50],outsl[50],outsg[50],outsp[50],outsgp[50]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 100 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[100],outsl[100],outsg[100],outsp[100],outsgp[100]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 200 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+A análise da qualidade da solução com um aumento significativo no número de pessoas com uma mudança pequena
+na quantidade de objetos não é muito eficiciente, pois em determinado valor, não terá objetos suficientes 
+para a quantidade de pessoas. Dessa forma somente entradas bem pequenas são avaliadas. Todavia, mesmo com 
+essa restrição já é possível analisar que o resultado da busca global e da busca local possui um maior 
+qualidade do que o da heurística. 
+
+\section{Efeito número de objetos}
+
+Nessa seção será realizada a análise do impacto de uma entrada com diferentes números de objetos
+nos 3 diferentes algoritmos implementados no projeto. A capacidade da máquina foi sendo testada,
+aumentando cada vez mais o input de com o número objetos. A variação do número de pessoas foi baixa,
+para que a mudança dessa variável não fosse importante para o tempo e qualidade da solução, e esses 
+se mantivessem em função do delta objetos. A busca global não conseguiu um tempo factível depois 
+de um número de entrada de 10 pessoas. Dessa forma, esse algoritmo aparecerá somente até o valor 
+de entrada 10 - para as demais entradas foi assumido um valor limite. 
+
+<<echo = False>>=
+sz=100
+arqs = [f"ino/in{i}.txt" for i in range(sz)]
+arqsg = [f"ino/in{i}.txt" for i in range(5)]
+heuristica=[]
+local=[]
+exaus=[]
+gpu=[]
+paralela=[]
+outsh=[]
+outsl=[]
+outsg=[]
+outsgp=[]
+outsp=[]
+@
+
+\subsection{Tempo}
+
+Nesta seção, a medida utilizada para a análise será a do tempo.
+
+<<echo = False>>=
+for arq in arqs:
+    heuristica.append(roda('./heuristica', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsh.append(int(line[0]))
+for arq in arqs:
+    local.append(roda('./local', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsl.append(int(line[0]))
+for arq in arqsg:
+    exaus.append(roda('./global', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsg.append(int(line[0]))
+for arq in arqs:
+    paralela.append(roda('./paralelo', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsp.append(int(line[0]))
+for arq in arqs:
+    gpu.append(roda('./gpu', arq)[1])
+    with open("out.txt",'r') as f:
+        line = f.readlines()
+        outsgp.append(int(line[0]))
+
+for i in range(sz-5):
+    exaus.append(7)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 20 PESSOAS 
+
+x= range(1,20,2)
+h,= plt.plot(x,heuristica[:10],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:10],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:10], 'g',label = 'Busca Global')
+p, = plt.plot(x,paralela[:10],label = 'Busca Local Multi-core')
+gp, = plt.plot(x,gpu[:10],label = 'Busca Local GPU')
+
+plt.title("Entrada máxima de 20 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo")
+plt.legend(handles=[h, l, g,p,gp],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+# 40 PESSOAS 
+
+x= range(1,40,2)
+h,= plt.plot(x,heuristica[:20],'b' ,label = "Heurística")
+l,= plt.plot(x,local[:20],'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus[:20], 'g',label = 'Busca Global')
+p, = plt.plot(x,paralela[:20],label = 'Busca Local Multi-core')
+gp, = plt.plot(x,gpu[:20],label = 'Busca Local GPU')
+
+plt.title("Entrada máxima de 40 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo")
+plt.legend(handles=[h, l, g,p,gp],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+
+import matplotlib.pyplot as plt
+x= range(1,sz*2,2)
+h,= plt.plot(x,heuristica,'b' ,label = "Heurística")
+l,= plt.plot(x,local,'m' ,label = 'Busca Local')
+g, = plt.plot(x,exaus, 'g',label = 'Busca Global')
+p, = plt.plot(x,paralela,label = 'Busca Local Multi-core')
+gp, = plt.plot(x,gpu,label = 'Busca Local GPU')
+
+
+plt.title("Entrada máxima de 200 pessoas ")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("Tempo ")
+plt.legend(handles=[h, l, g,p,gp],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+@
+Como analisado no gráfico do tempo da seção anterior, a busca local e a busca global possuem uma 
+variação significamente maior do que a heurística. Nas entradas pequenas as 3 implementações possuem 
+tempos parecidos, mas há uma relação direta com o aumento da quantidade de objetos na entrada e com a
+aumento do tempo da busca global e local, enquanto o tempo da heurística não altera muito. Novamente
+é perceptível a rápida mudança no tempo da busca global, que inicia inferior ao da busca local e depois
+aumenta drasticamente.
+
+\subsection{Qualidade da solução}
+
+
+\subsubsection{Gráficos}
+
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[10],outsl[10],outsg[10],outsp[10],outsgp[10]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 20 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[25],outsl[25],outsg[25],outsp[25],outsgp[25]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 50 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[50],outsl[50],outsg[50],outsp[50],outsgp[50]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 100 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+<<fig = True, width = '15 cm', echo = False>>=
+import matplotlib.pyplot as plt
+
+x= range(1,sz*2,2)
+for i in range(sz-5):
+    outsg.append(outsg[-1])
+xbar=["heuristica","local","global","multi-core", "gpu"]
+ybar=[outsh[100],outsl[100],outsg[100],outsp[100],outsgp[100]]
+
+plt.bar(xbar,ybar,color ='maroon',width = 0.4)
+
+plt.title("Entrada de 200 pessoas")
+plt.xlabel("Tamanho entrada ")
+plt.ylabel("MMS")
+
+@
+
+
+No último gráfico de qualidade da solução pode ser observado que com entradas pequenas os três algoritmos 
+possuem resultados parecido. Contanto, com o aumento do número de objetos a diferença entre a busca local
+heurística vai se tornando cada vez maior. No priemiro gráfico de qualidade da solução pode ser observado 
+que a busca global estava crescendo com variação parecida da busca local, ou seja, pode se que
+essas duas implementacões, se possível avaliar, tivessem resultados mais parecidos do que os da 
+busca local e da heurística.
+
+
+\section{Conclusão}
+
+As implentações analisadas no relatório possuem algumas caracteristicas diferentes. Para entradas pequenas 
+os algoritmos apresentam soluções com qualidades muito parecidas, e o tempo da heurística 
+já inicia um pouco menor. Dessa forma essa algoritmo parece ser eficiente para entradas pequenas, 
+uma vez que é mais rápido e possui saídas com alta qualidade. Na medida que o a entrada aumenta o tempo da
+busca local e global aumenta, e a qualidade da solução da heurística cai. Assim sendo, para entradas cada vez
+maiores, resultados cada vez maiores são tidos a partir da busca local. Consequentemente, as implementações 
+podem ser utilizadas para diferentes finalidades, cada uma podendo ser escolhida a partir das preferências e 
+importâncias de determinado projeto.
+
+
+
+\end{document}
+
+
